@@ -218,6 +218,14 @@ testSuiteFieldGrammar = TestSuiteStanza
     <*> optionalFieldAla "main-is"     FilePathNT testStanzaMainIs
     <*> optionalField    "test-module"            testStanzaTestModule
     <*> blurFieldGrammar testStanzaBuildInfo buildInfoFieldGrammar
+    & fmap addMissingType
+  where
+    addMissingType stanza = case _testStanzaTestType stanza of
+        Nothing -> case (_testStanzaMainIs stanza, _testStanzaTestModule stanza) of
+            (Just _, Nothing) -> stanza & testStanzaTestType ?~ testTypeExeLatest
+            (Nothing, Just _) -> stanza & testStanzaTestType ?~ testTypeLibLatest
+            _                 -> stanza
+        _                     -> stanza
 
 validateTestSuite :: Position -> TestSuiteStanza -> ParseResult TestSuite
 validateTestSuite pos stanza = case _testStanzaTestType stanza of
@@ -320,6 +328,11 @@ benchmarkFieldGrammar = BenchmarkStanza
     <*> optionalFieldAla "main-is"          FilePathNT benchmarkStanzaMainIs
     <*> optionalField    "benchmark-module"            benchmarkStanzaBenchmarkModule
     <*> blurFieldGrammar benchmarkStanzaBuildInfo buildInfoFieldGrammar
+    & fmap addMissingType
+  where
+    addMissingType stanza = case (_benchmarkStanzaBenchmarkType stanza, _benchmarkStanzaMainIs stanza) of
+        (Nothing, Just _) -> stanza & benchmarkStanzaBenchmarkType ?~ benchmarkTypeExeLatest
+        _                 -> stanza
 
 validateBenchmark :: Position -> BenchmarkStanza -> ParseResult Benchmark
 validateBenchmark pos stanza = case _benchmarkStanzaBenchmarkType stanza of

@@ -1622,7 +1622,7 @@ Test suites
 The test suite may be described using the following fields, as well as
 build information fields (see the section on `build information`_).
 
-.. pkg-field:: type: interface (required)
+.. pkg-field:: type: interface
 
     The interface type and version of the test suite. Cabal supports two
     test suite interfaces, called ``exitcode-stdio-1.0`` and

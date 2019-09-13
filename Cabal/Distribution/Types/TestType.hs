@@ -4,6 +4,8 @@
 module Distribution.Types.TestType (
     TestType(..),
     knownTestTypes,
+    testTypeExeLatest,
+    testTypeLibLatest,
 ) where
 
 import Distribution.Compat.Prelude
@@ -26,8 +28,15 @@ instance Binary TestType
 instance NFData TestType where rnf = genericRnf
 
 knownTestTypes :: [TestType]
-knownTestTypes = [ TestTypeExe (mkVersion [1,0])
-                 , TestTypeLib (mkVersion [0,9]) ]
+knownTestTypes = [ testTypeExeLatest
+                 , testTypeLibLatest
+                 ]
+
+testTypeExeLatest :: TestType
+testTypeExeLatest = TestTypeExe (mkVersion [1,0])
+
+testTypeLibLatest :: TestType
+testTypeLibLatest = TestTypeLib (mkVersion [0,9])
 
 instance Pretty TestType where
   pretty (TestTypeExe ver)          = text "exitcode-stdio-" <<>> pretty ver

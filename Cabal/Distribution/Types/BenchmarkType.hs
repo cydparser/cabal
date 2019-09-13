@@ -4,6 +4,7 @@
 module Distribution.Types.BenchmarkType (
     BenchmarkType(..),
     knownBenchmarkTypes,
+    benchmarkTypeExeLatest,
 ) where
 
 import Distribution.Compat.Prelude
@@ -27,7 +28,10 @@ instance Binary BenchmarkType
 instance NFData BenchmarkType where rnf = genericRnf
 
 knownBenchmarkTypes :: [BenchmarkType]
-knownBenchmarkTypes = [ BenchmarkTypeExe (mkVersion [1,0]) ]
+knownBenchmarkTypes = [ benchmarkTypeExeLatest ]
+
+benchmarkTypeExeLatest :: BenchmarkType
+benchmarkTypeExeLatest = BenchmarkTypeExe (mkVersion [1,0])
 
 instance Pretty BenchmarkType where
   pretty (BenchmarkTypeExe ver)          = text "exitcode-stdio-" <<>> pretty ver
