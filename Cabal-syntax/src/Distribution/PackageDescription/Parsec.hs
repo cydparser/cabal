@@ -316,13 +316,6 @@ goSections specVer = traverse_ process
             testStanza <- lift $ parseCondTree' testSuiteFieldGrammar (fromBuildInfo' name') commonStanzas fields
             testSuite  <- lift $ traverse (validateTestSuite pos) testStanza
 
-            let hasType ts = testInterface ts /= testInterface mempty
-            unless (onAllBranches hasType testSuite) $ lift $ parseFailure pos $ concat
-                [ "Test suite " ++ show (prettyShow name')
-                , " is missing either field \"main-is\" or field \"test-module\" "
-                , " or neither is present in all conditional branches."
-                ]
-
             -- TODO check duplicate name here?
             stateGpd . L.condTestSuites %= snoc (name', testSuite)
 
@@ -331,13 +324,6 @@ goSections specVer = traverse_ process
             name'       <- parseUnqualComponentName pos args
             benchStanza <- lift $ parseCondTree' benchmarkFieldGrammar (fromBuildInfo' name') commonStanzas fields
             bench       <- lift $ traverse (validateBenchmark pos) benchStanza
-
-            let hasType ts = benchmarkInterface ts /= benchmarkInterface mempty
-            unless (onAllBranches hasType bench) $ lift $ parseFailure pos $ concat
-                [ "Benchmark " ++ show (prettyShow name')
-                , " is missing required field \"main-is\" or the field "
-                , "is not present in all conditional branches."
-                ]
 
             -- TODO check duplicate name here?
             stateGpd . L.condBenchmarks %= snoc (name', bench)
