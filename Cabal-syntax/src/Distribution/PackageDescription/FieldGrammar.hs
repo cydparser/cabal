@@ -325,18 +325,16 @@ testSuiteFieldGrammar = TestSuiteStanza
           ^^^ availableSince CabalSpecV3_6 [] -- TODO 3_8
 
 validateTestSuite :: Position -> TestSuiteStanza -> ParseResult TestSuite
-validateTestSuite pos stanza = case _testStanzaTestType stanza <|> inferredTestType of
-    Nothing -> pure basicTestSuite
-
-    Just tt@(TestTypeUnknown _ _) ->
+validateTestSuite pos stanza = case testSuiteType of
+    tt@(TestTypeUnknown _ _) ->
         pure basicTestSuite
             { testInterface = TestSuiteUnsupported tt }
 
-    Just tt | tt `notElem` knownTestTypes ->
+    tt | tt `notElem` knownTestTypes ->
         pure basicTestSuite
             { testInterface = TestSuiteUnsupported tt }
 
-    Just tt@(TestTypeExe ver) -> case _testStanzaMainIs stanza of
+    tt@(TestTypeExe ver) -> case _testStanzaMainIs stanza of
         Nothing   -> do
             parseFailure pos (missingField "main-is" tt)
             pure emptyTestSuite
@@ -346,7 +344,7 @@ validateTestSuite pos stanza = case _testStanzaTestType stanza <|> inferredTestT
             pure basicTestSuite
                 { testInterface = TestSuiteExeV10 ver file }
 
-    Just tt@(TestTypeLib ver) -> case _testStanzaTestModule stanza of
+    tt@(TestTypeLib ver) -> case _testStanzaTestModule stanza of
          Nothing      -> do
             parseFailure pos (missingField "test-module" tt)
             pure emptyTestSuite
@@ -357,10 +355,10 @@ validateTestSuite pos stanza = case _testStanzaTestType stanza <|> inferredTestT
                 { testInterface = TestSuiteLibV09 ver module_ }
 
   where
-    inferredTestType =
-      testTypeExe <$ _testStanzaMainIs stanza
-      <|>
-      testTypeLib <$ _testStanzaTestModule stanza
+    testSuiteType = fromMaybe testTypeExe $
+        _testStanzaTestType stanza
+        <|> testTypeExe <$ _testStanzaMainIs stanza
+        <|> testTypeLib <$ _testStanzaTestModule stanza
 
     missingField name tt = "The '" ++ name ++ "' field is required for the "
                         ++ prettyShow tt ++ " test suite type."
@@ -447,21 +445,18 @@ benchmarkFieldGrammar = BenchmarkStanza
     <*> blurFieldGrammar benchmarkStanzaBuildInfo buildInfoFieldGrammar
 
 validateBenchmark :: Position -> BenchmarkStanza -> ParseResult Benchmark
-validateBenchmark pos stanza = case _benchmarkStanzaBenchmarkType stanza <|> inferredBenchmarkType of
-    Nothing -> pure emptyBenchmark
-        { benchmarkBuildInfo = _benchmarkStanzaBuildInfo stanza }
-
-    Just tt@(BenchmarkTypeUnknown _ _) -> pure emptyBenchmark
+validateBenchmark pos stanza = case benchmarkStanzaType of
+    tt@(BenchmarkTypeUnknown _ _) -> pure emptyBenchmark
         { benchmarkInterface = BenchmarkUnsupported tt
         , benchmarkBuildInfo = _benchmarkStanzaBuildInfo stanza
         }
 
-    Just tt | tt `notElem` knownBenchmarkTypes -> pure emptyBenchmark
+    tt | tt `notElem` knownBenchmarkTypes -> pure emptyBenchmark
         { benchmarkInterface = BenchmarkUnsupported tt
         , benchmarkBuildInfo = _benchmarkStanzaBuildInfo stanza
         }
 
-    Just tt@(BenchmarkTypeExe ver) -> case _benchmarkStanzaMainIs stanza of
+    tt@(BenchmarkTypeExe ver) -> case _benchmarkStanzaMainIs stanza of
         Nothing   -> do
             parseFailure pos (missingField "main-is" tt)
             pure emptyBenchmark
@@ -474,8 +469,8 @@ validateBenchmark pos stanza = case _benchmarkStanzaBenchmarkType stanza <|> inf
                 }
 
   where
-    inferredBenchmarkType =
-      benchmarkTypeExe <$ _benchmarkStanzaMainIs stanza
+    benchmarkStanzaType = fromMaybe benchmarkTypeExe $
+        _benchmarkStanzaBenchmarkType stanza
 
     missingField name tt = "The '" ++ name ++ "' field is required for the "
                         ++ prettyShow tt ++ " benchmark type."
