@@ -1188,7 +1188,7 @@ Test suites
 The test suite may be described using the following fields, as well as
 build information fields (see the section on `build information`_).
 
-.. pkg-field:: type: interface (required)
+.. pkg-field:: type: interface
 
     The interface type and version of the test suite. Cabal supports two
     test suite interfaces, called ``exitcode-stdio-1.0`` and
@@ -1345,19 +1345,7 @@ Benchmarks
 The benchmark may be described using the following fields, as well as
 build information fields (see the section on `build information`_).
 
-.. pkg-field:: type: interface (required)
-
-    The interface type and version of the benchmark. At the moment Cabal
-    only support one benchmark interface, called ``exitcode-stdio-1.0``.
-
-Benchmarks using the ``exitcode-stdio-1.0`` interface are executables
-that indicate failure to run the benchmark with a non-zero exit code
-when run; they may provide human-readable information through the
-standard output and error channels.
-
 .. pkg-field:: main-is: filename
-
-    :required: ``exitcode-stdio-1.0``
 
     The name of the ``.hs`` or ``.lhs`` file containing the ``Main``
     module. Note that it is the ``.hs`` filename that must be listed,
@@ -1367,11 +1355,8 @@ standard output and error channels.
     field of an executable section. Further, while the name of the file may
     vary, the module itself must be named ``Main``.
 
-Example: Package using ``exitcode-stdio-1.0`` interface
+Example:
 """""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The example package description and executable source file below
-demonstrate the use of the ``exitcode-stdio-1.0`` interface.
 
 .. code-block:: cabal
     :caption: foo.cabal
@@ -1384,7 +1369,6 @@ demonstrate the use of the ``exitcode-stdio-1.0`` interface.
     Build-Type:     Simple
 
     Benchmark bench-foo
-        type:             exitcode-stdio-1.0
         main-is:          bench-foo.hs
         build-depends:    base >= 4 && < 5, time >= 1.1 && < 1.7
         default-language: Haskell2010
